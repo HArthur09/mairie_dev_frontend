@@ -25,12 +25,11 @@ export default function MariageList() {
     queryFn: fetchMariages,
     keepPreviousData: true,
   })
-  console.log(data)
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => api.delete(`/mariages/${id}/`),
+    mutationFn: (id) => api.delete(`/mairie/mariages/${id}/`),
     onSuccess: () => {
-      message.success('Supprimé')
+      message.success('Marriage Supprimé ✅')
       queryClient.invalidateQueries({ queryKey: ['mariages'] })
     },
     onError: () => message.error('Erreur suppression'),
@@ -85,7 +84,14 @@ export default function MariageList() {
     <div>
       <Space style={{ marginBottom: 16 }}>
         <Input.Search
-          placeholder="Rechercher (lieu, maire...)"
+          placeholder="Rechercher (maire, époux, épouse...)"
+          allowClear
+          onChange={(e) =>{
+            if(e.target.value === ''){
+              setSearch('')
+              setPage(1);
+            }
+          }}
           onSearch={(val) => { setSearch(val); setPage(1) }}
           style={{ width: 300 }}
         />

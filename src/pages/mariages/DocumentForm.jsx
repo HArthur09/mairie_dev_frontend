@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Form, Checkbox } from 'antd'
 
 const documentsList = [
@@ -21,19 +21,24 @@ const documentsList = [
 
 ]
 
-export default function DocumentsForm({ data, setData, formRefs }) {
-  const onChange = (values) => {
-    setData(prev => ({
-      ...prev,
-      id_dossier: { ...prev.id_dossier, ...values }
-    }))
+export default function DocumentsForm({ data, setData }) {
+  const onChange = (_, values) => {
+    setData(values)
   }
+  const [form] = Form.useForm()
+
+  useEffect(() => {
+    if (data) {
+      form.setFieldsValue(data)
+    }
+  }, [data, form])
 
   return (
     <Form
+      form={form}
       layout="vertical"
       onValuesChange={onChange}
-      initialValues={data.id_dossier}
+      initialValues={data}
     >
       {documentsList.map(doc => (
         <Form.Item key={doc.name} name={doc.name} valuePropName="checked" rules={doc.required ? [{ required: true, message: 'Ce document est requis' }] : []}>

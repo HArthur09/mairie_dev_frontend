@@ -1,18 +1,21 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import { Form, Input, DatePicker, InputNumber, Select } from 'antd'
 
-export default function FemmeForm({ data, setData, formRefs }) {
+export default function FemmeForm({ data, setData }) {
   const [form] = Form.useForm()
 
   const onValuesChange = (_, allValues) => {
-    setData(prev => ({ ...prev, infos_femme: allValues }))
+    setData(allValues)
   }
+
+  useEffect(() => {
+    form.setFieldsValue(data)
+  }, [data, form])
 
   return (
     <Form
       form={form}
       layout="vertical"
-      ref={ref => { formRefs.current['femme'] = form }}
       onValuesChange={onValuesChange}
       initialValues={data.infos_femme}
     >

@@ -21,19 +21,7 @@ export default function LoginPage() {
       navigate('/mariages', { replace: true })
     } catch (err) {
       message.error('Impossible de se connecter. Vérifiez vos identifiants. ❌')
-      const data = err?.response?.data || {}
-      if (data.detail) {
-        form.setFields([
-          { name: 'username', errors: ['Nom d’utilisateur ou mot de passe incorrect.'] },
-          { name: 'password', errors: [] },
-        ])
-      } else if (data.username) {
-        form.setFields([{ name: 'username', errors: data.username }])
-      } else if (data.password) {
-        form.setFields([{ name: 'password', errors: data.password }])
-      } else {
-        message.error('Impossible de se connecter. Vérifiez vos identifiants.')
-      }
+      console.error('Login failed', err)
     } finally {
       setLoading(false)
     }

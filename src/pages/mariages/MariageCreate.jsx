@@ -49,7 +49,6 @@ export default function MariageCreate() {
   const handleSubmit = async () => {
     setLoading(true)
     try {
-      console.log('Données soumises :', formData)
       await createMariage(formData)
       message.success('Mariage enregistré avec succès 🎉')
       setCurrent(0)

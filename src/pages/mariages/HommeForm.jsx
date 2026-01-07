@@ -1,19 +1,25 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Form, Input, DatePicker, InputNumber, Select } from 'antd'
 //import dayjs from 'dayjs'
 
-export default function HommeForm({ data, setData, formRefs }) {
+export default function HommeForm({ data, setData }) {
   const [form] = Form.useForm()
 
   const onValuesChange = (_, allValues) => {
-    setData(prev => ({ ...prev, infos_homme: allValues }))
+    setData(allValues)
   }
+
+  useEffect(() => {
+    if (data){
+      form.setFieldsValue(data)
+    }
+  }, [data, form])
+  
 
   return (
     <Form
       form={form}
       layout="vertical"
-      ref={ref => { formRefs.current['homme'] = form }}
       onValuesChange={onValuesChange}
       initialValues={data.infos_homme}
     >

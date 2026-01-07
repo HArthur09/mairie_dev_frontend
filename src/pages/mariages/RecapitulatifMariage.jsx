@@ -3,7 +3,6 @@ import { Descriptions, Divider } from 'antd'
 import dayjs from 'dayjs'
 
 export default function RecapitulatifMariage({ data }) {
-  console.log('Données récapitulatives :', data.infos_homme.date_naissance)
   const { infos_homme = {}, infos_femme = {}, id_dossier = {} } = data
 
   // Formatage date + heure si objets dayjs
@@ -32,7 +31,7 @@ export default function RecapitulatifMariage({ data }) {
 
   const heureStr = data.heure_celebration
     ? dayjs.isDayjs(data.heure_celebration)
-      ? data.heure_celebration.format('HH:mm')
+      ? data.heure_celebration.format('HH:mm:ss')
       : data.heure_celebration
     : '—'
 
