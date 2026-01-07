@@ -1,0 +1,83 @@
+.login-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background-color: #f0f2f5;
+}
+
+.login-illustration {
+  flex: 1;
+  background: linear-gradient(135deg, #1677ff, #4096ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-illustration::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  left: -50px;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(rgba(255,255,255,0.15) 20%, transparent 20%);
+  background-size: 80px 80px;
+  transform: rotate(25deg);
+}
+
+.login-illustration .overlay {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 2rem;
+}
+
+.login-form-section {
+  flex: 1;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card {
+  width: 380px;
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 900px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .login-illustration {
+    display: none;
+  }
+
+  .login-form-section {
+    flex: none;
+    height: 100vh;
+  }
+
+  .login-card {
+    width: 90%;
+  }
+}
