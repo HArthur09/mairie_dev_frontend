@@ -1,18 +1,27 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Form, Input, DatePicker, TimePicker } from 'antd'
 
 export default function MariageDetailsForm({ data, setData, formRefs }) {
   const [form] = Form.useForm()
 
   const onValuesChange = (_, allValues) => {
-    setData(prev => ({ ...prev, ...allValues }))
+    setData(allValues);
   }
+
+  useEffect(() => {
+    if (formRefs) formRefs.current['details'] = form;
+  }, [form, formRefs]);
+
+  useEffect(() => {
+    if (data) {
+      form.setFieldsValue(data);
+    }
+  }, [data, form]);
 
   return (
     <Form
       form={form}
       layout="vertical"
-      ref={ref => { formRefs.current['homme'] = form }}
       onValuesChange={onValuesChange}
       initialValues={data}
     >

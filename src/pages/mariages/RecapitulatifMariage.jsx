@@ -3,6 +3,7 @@ import { Descriptions, Divider } from 'antd'
 import dayjs from 'dayjs'
 
 export default function RecapitulatifMariage({ data }) {
+  //console.log('RecapitulatifMariage data:', data)
   const { infos_homme = {}, infos_femme = {}, id_dossier = {} } = data
 
   // Formatage date + heure si objets dayjs
@@ -11,7 +12,7 @@ export default function RecapitulatifMariage({ data }) {
       ? infos_homme.date_naissance.format('YYYY-MM-DD')
       : infos_homme.date_naissance
     : '—'
-  data.infos_homme.date_naissance = NH
+  //data.infos_homme.date_naissance = NH
 
   const NF = infos_femme.date_naissance
     ? dayjs.isDayjs(infos_femme.date_naissance)
@@ -19,7 +20,7 @@ export default function RecapitulatifMariage({ data }) {
       : infos_femme.date_naissance
     : '—'
 
-  data.infos_femme.date_naissance = NF
+  //data.infos_femme.date_naissance = NF
 
   const dateStr = data.date_celebration
     ? dayjs.isDayjs(data.date_celebration)
@@ -27,7 +28,7 @@ export default function RecapitulatifMariage({ data }) {
       : data.date_celebration
     : '—'
 
-  data.date_celebration = dateStr
+  //data.date_celebration = dateStr
 
   const heureStr = data.heure_celebration
     ? dayjs.isDayjs(data.heure_celebration)
@@ -35,7 +36,7 @@ export default function RecapitulatifMariage({ data }) {
       : data.heure_celebration
     : '—'
 
-  data.heure_celebration = heureStr
+  //data.heure_celebration = heureStr
 
   const trueDocs = Object.keys(id_dossier).filter(key => id_dossier[key])
 

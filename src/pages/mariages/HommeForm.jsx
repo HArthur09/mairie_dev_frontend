@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { Form, Input, DatePicker, InputNumber, Select } from 'antd'
 //import dayjs from 'dayjs'
 
-export default function HommeForm({ data, setData }) {
+export default function HommeForm({ data, setData, formRefs }) {
   const [form] = Form.useForm()
 
   const onValuesChange = (_, allValues) => {
@@ -10,7 +10,12 @@ export default function HommeForm({ data, setData }) {
   }
 
   useEffect(() => {
-    if (data){
+    if (formRefs) formRefs.current['homme'] = form;
+  }, [form, formRefs]);
+
+  useEffect(() => {
+    
+    if (data) {
       form.setFieldsValue(data)
     }
   }, [data, form])
@@ -21,7 +26,6 @@ export default function HommeForm({ data, setData }) {
       form={form}
       layout="vertical"
       onValuesChange={onValuesChange}
-      initialValues={data.infos_homme}
     >
       <Form.Item name="nom" label="Nom" rules={[{ required: true }]}>
         <Input />

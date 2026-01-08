@@ -7,6 +7,7 @@ import MariageDetailsForm from './MariageDetailsForm'
 import RecapitulatifMariage from './RecapitulatifMariage'
 import { createMariage } from '../../api/mariage'
 import { useNavigate } from 'react-router-dom'
+import dayjs from 'dayjs'
 
 const { Step } = Steps
 
@@ -49,7 +50,29 @@ export default function MariageCreate() {
   const handleSubmit = async () => {
     setLoading(true)
     try {
-      await createMariage(formData)
+      // formatage des dates avant l'envoi pour correspondre au format attendu par l'API
+      const payload = {...formData,
+        date_celebration: formData.date_celebration 
+          ? dayjs(formData.date_celebration).format('YYYY-MM-DD') 
+          : null,
+        heure_celebration: formData.heure_celebration 
+          ? dayjs(formData.heure_celebration).format('HH:mm:ss') 
+          : null,
+        
+        infos_homme: {
+          ...formData.infos_homme,
+          date_naissance: formData.infos_homme?.date_naissance 
+            ? dayjs(formData.infos_homme.date_naissance).format('YYYY-MM-DD') 
+            : null,
+        },
+        infos_femme: {
+          ...formData.infos_femme,
+          date_naissance: formData.infos_femme?.date_naissance 
+            ? dayjs(formData.infos_femme.date_naissance).format('YYYY-MM-DD') 
+            : null,
+        }
+      }
+      await createMariage(payload)
       message.success('Mariage enregistré avec succès 🎉')
       setCurrent(0)
       setFormData({})
@@ -69,8 +92,32 @@ export default function MariageCreate() {
       <Steps current={current} items={steps.map(s => ({ title: s.title }))} />
       <div style={{ marginTop: 32, minHeight: 360 }}>
         <StepComponent
-          data={formData}
-          setData={setFormData}
+          // On passe la branche spécifique des données
+          data={
+            current === 0 ? formData.infos_homme :
+            current === 1 ? formData.infos_femme :
+            current === 2 ? formData.id_dossier :
+            formData
+          }
+          // On passe une fonction qui met à jour seulement sa branche
+          setData={(values) => {
+            const key = steps[current].key;
+            if (key === 'recap') return;
+            
+            setFormData(prev => {
+              if (key === 'details') return { ...prev, ...values }; // MariageDetails est à la racine
+              const mapping = {
+                homme: 'infos_homme',
+                femme: 'infos_femme',
+                documents: 'id_dossier'
+              };
+
+              return {
+                ...prev,
+                [mapping[key]]: values
+              };
+            });
+          }}
           formRefs={formRefs}
         />
       </div>

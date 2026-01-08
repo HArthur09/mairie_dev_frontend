@@ -21,24 +21,28 @@ const documentsList = [
 
 ]
 
-export default function DocumentsForm({ data, setData }) {
-  const onChange = (_, values) => {
-    setData(values)
-  }
+export default function DocumentsForm({ data, setData, formRefs }) {
   const [form] = Form.useForm()
+
+  const onValuesChange = (_, allValues) => {
+    setData(allValues);
+  };
+
+  useEffect(() => {
+    if (formRefs) formRefs.current['documents'] = form;
+  }, [form, formRefs]);
 
   useEffect(() => {
     if (data) {
-      form.setFieldsValue(data)
+      form.setFieldsValue(data);
     }
-  }, [data, form])
+  }, [data, form]);
 
   return (
     <Form
       form={form}
       layout="vertical"
-      onValuesChange={onChange}
-      initialValues={data}
+      onValuesChange={onValuesChange}
     >
       {documentsList.map(doc => (
         <Form.Item key={doc.name} name={doc.name} valuePropName="checked" rules={doc.required ? [{ required: true, message: 'Ce document est requis' }] : []}>

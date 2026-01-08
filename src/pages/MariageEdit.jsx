@@ -1,6 +1,6 @@
 // src/pages/mariages/MariageEdit.jsx
 import React, { useEffect, useState, useRef } from 'react'
-import { Steps, Button, Spin, App as AntdApp } from 'antd'
+import { Steps, Button, Spin, App as AntdApp, Card } from 'antd'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/axios'
@@ -26,21 +26,26 @@ export default function MariageEdit() {
   const [current, setCurrent] = useState(0)
   const [formData, setFormData] = useState(null)
 
-  // 🧩 Étapes du formulaire
-  const steps = [
-    { title: 'Documents', content: <DocumentsForm data={formData?.id_dossier} setData={(v) => setFormData((p) => ({ ...p, id_dossier: v }))} /> },
-    { title: 'Époux', content: <HommeForm data={formData?.infos_homme || {}} setData={(v) => setFormData((p) => ({ ...p, infos_homme: v }))} formRefs={formRefs} /> },
-    { title: 'Épouse', content: <FemmeForm data={formData?.infos_femme || {}} setData={(v) => setFormData((p) => ({ ...p, infos_femme: v }))} formRefs={formRefs} /> },
-    { title: 'Mariage', content: <MariageDetailsForm data={formData || {}} setData={setFormData} formRefs={formRefs} /> },
-    { title: 'Récapitulatif', content: <RecapitulatifMariage data={formData} /> },
-  ]
-
   // 🧠 Requête pour charger le mariage existant
   const { data, isLoading, isError } = useQuery({
     queryKey: ['mariage', id],
     queryFn: () => fetchMariageById(id),
     enabled: !!id,
   })
+
+    // ⚙️ Initialisation du formData après le chargement
+  useEffect(() => {
+    if (data) {
+      setFormData({
+        ...data,
+        date_celebration: data.date_celebration ? dayjs(data.date_celebration) : null,
+        heure_celebration: data.heure_celebration ? dayjs(data.heure_celebration, 'HH:mm:ss') : null,
+        infos_homme: {...data.infos_homme, date_naissance: data.infos_homme?.date_naissance ? dayjs(data.infos_homme.date_naissance) : null,},
+        infos_femme: {...data.infos_femme, date_naissance: data.infos_femme?.date_naissance ? dayjs(data.infos_femme.date_naissance) : null,}
+      })
+    }
+  }, [data])
+
 
   // 🛠️ Mutation pour mettre à jour le mariage
   const updateMutation = useMutation({
@@ -57,37 +62,47 @@ export default function MariageEdit() {
     },
   })
 
-  // ⚙️ Initialisation du formData après le chargement
-  useEffect(() => {
-    if (data) {
-      setFormData({
-        ...data,
-        date_celebration: data.date_celebration ? dayjs(data.date_celebration) : null,
-        heure_celebration: data.heure_celebration ? dayjs(data.heure_celebration, 'HH:mm:ss') : null,
-        infos_homme: {...data.infos_homme, date_naissance: data.infos_homme?.date_naissance ? dayjs(data.infos_homme.date_naissance) : null,},
-        infos_femme: {...data.infos_femme, date_naissance: data.infos_femme?.date_naissance ? dayjs(data.infos_femme.date_naissance) : null,}
-      })
-    }
-  }, [data])
+  // 🧩 Configuration des étapes (Logique identique à MariageCreate)
+  const steps = [
+    { title: 'Époux', key: 'homme', component: HommeForm },
+    { title: 'Épouse', key: 'femme', component: FemmeForm },
+    { title: 'Documents', key: 'documents', component: DocumentsForm },
+    { title: 'Détails', key: 'details', component: MariageDetailsForm },
+    { title: 'Récapitulatif', key: 'recap', component: RecapitulatifMariage },
+  ]
 
-  const next = () => setCurrent(current + 1)
+  const next = async () => {
+    const key = steps[current].key
+    if (key !== 'recap' && formRefs.current[key]) {
+      try {
+        await formRefs.current[key].validateFields()
+      } catch {
+        message.error('Veuillez remplir les champs obligatoires')
+        return
+      }
+    }
+    setCurrent(current + 1)
+  }
   const prev = () => setCurrent(current - 1)
 
   const handleSubmit = async () => {
     if (!formData) return
-    const payload = {
-      ...formData,
-      date_celebration: formData.date_celebration
-        ? dayjs(formData.date_celebration).format('YYYY-MM-DD')
-        : null,
-      heure_celebration: formData.heure_celebration
-        ? dayjs(formData.heure_celebration, 'HH:mm').format('HH:mm:ss')
-        : null,
+    
+    // Formatage strict pour Django avant l'envoi
+    const payload = {...formData,
+      date_celebration: formData.date_celebration ? dayjs(formData.date_celebration).format('YYYY-MM-DD') : null,
+      heure_celebration: formData.heure_celebration ? dayjs(formData.heure_celebration).format('HH:mm:ss') : null,
+      infos_homme: {...formData.infos_homme,
+        date_naissance: formData.infos_homme?.date_naissance ? dayjs(formData.infos_homme.date_naissance).format('YYYY-MM-DD') : null,
+      },
+      infos_femme: {...formData.infos_femme,
+        date_naissance: formData.infos_femme?.date_naissance ? dayjs(formData.infos_femme.date_naissance).format('YYYY-MM-DD') : null,
+      }
     }
     updateMutation.mutate(payload)
   }
 
-  if (isLoading) {
+  if (isLoading || !formData) {
     return (
       <div style={{ textAlign: 'center', marginTop: 100 }}>
         <Spin size="large" />
@@ -99,14 +114,30 @@ export default function MariageEdit() {
     return <p style={{ textAlign: 'center', color: 'red' }}>Erreur de chargement des données.</p>
   }
 
+  const StepComponent = steps[current].component
+
   return (
-    <div style={{ padding: 24, maxWidth: 1000, margin: 'auto' }}>
-      <Steps
-        current={current}
-        items={steps.map((s) => ({ title: s.title }))}
-        style={{ marginBottom: 24 }}
-      />
-      <div style={{ marginBottom: 24 }}>{steps[current].content}</div>
+    <Card style={{ maxWidth: 1200, margin: '40px auto', padding: '20px 0' }}>
+      <Steps current={current} items={steps.map(s => ({ title: s.title }))} style={{ marginBottom: 32 }} />
+      <div style={{ padding: 24, maxWidth: 1000, margin: 'auto' }}>
+        <StepComponent
+          data={
+              current === 0 ? formData.infos_homme :
+              current === 1 ? formData.infos_femme :
+              current === 2 ? formData.id_dossier :
+              formData
+          }
+          setData={(values) => {
+            const key = steps[current].key
+            setFormData(prev => {
+              if (key === 'details') return { ...prev, ...values }
+              const mapping = { homme: 'infos_homme', femme: 'infos_femme', documents: 'id_dossier' }
+              return { ...prev, [mapping[key]]: values }
+            })
+          }}
+          formRefs={formRefs}
+        />
+      </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         {current > 0 && (
@@ -114,17 +145,16 @@ export default function MariageEdit() {
             Précédent
           </Button>
         )}
-        {current < steps.length - 1 && (
+        {current < steps.length - 1 ? (
           <Button type="primary" onClick={next}>
             Suivant
           </Button>
-        )}
-        {current === steps.length - 1 && (
+        ) : (
           <Button type="primary" onClick={handleSubmit} loading={updateMutation.isPending}>
             Enregistrer les modifications
           </Button>
         )}
       </div>
-    </div>
+    </Card>
   )
 }

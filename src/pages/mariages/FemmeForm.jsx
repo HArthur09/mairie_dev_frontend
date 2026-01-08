@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react'
 import { Form, Input, DatePicker, InputNumber, Select } from 'antd'
 
-export default function FemmeForm({ data, setData }) {
+export default function FemmeForm({ data, setData, formRefs }) {
   const [form] = Form.useForm()
 
   const onValuesChange = (_, allValues) => {
@@ -9,7 +9,13 @@ export default function FemmeForm({ data, setData }) {
   }
 
   useEffect(() => {
-    form.setFieldsValue(data)
+    if (formRefs) formRefs.current['femme'] = form;
+  }, [form, formRefs]);
+
+  useEffect(() => {
+    if (data) {
+      form.setFieldsValue(data)
+    }
   }, [data, form])
 
   return (
@@ -17,7 +23,6 @@ export default function FemmeForm({ data, setData }) {
       form={form}
       layout="vertical"
       onValuesChange={onValuesChange}
-      initialValues={data.infos_femme}
     >
       <Form.Item name="nom" label="Nom" rules={[{ required: true }]}>
         <Input />
